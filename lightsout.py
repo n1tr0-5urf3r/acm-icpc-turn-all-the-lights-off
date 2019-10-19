@@ -20,20 +20,6 @@ class Board:
         b = Board(self.row, self.solving_path, new_mat)
         return b
 
-    def plot(self):
-        """Plots a given matrix as grid"""
-        plt.figure(1, figsize=(self.row, self.col))
-        tb = plt.table(cellText=self.matrix, loc=(0, 0), cellLoc='center')
-
-        tc = tb.properties()['child_artists']
-        for cell in tc:
-            cell.set_height(1.0 / self.row)
-            cell.set_width(1.0 / self.col)
-        ax = plt.gca()
-        ax.set_xticks([])
-        ax.set_yticks([])
-        plt.show()
-
     def invert(self, row_index, col_index):
         """Inverts state of a given room"""
         if self.matrix[row_index, col_index]:
@@ -65,10 +51,14 @@ class Board:
 
 
 class Solver:
-    def __init__(self, board):
+    def __init__(self, board, speed=0.0001):
         self.boards = [board]
         self.known_configs = [hash(str(board.matrix))]
         self.found_solutions = []
+        self.speed = speed
+
+        # Used for visualizing
+        self.fig = plt.figure()
 
     def solve(self):
         """
@@ -80,8 +70,10 @@ class Solver:
             new_boards = []
             # print("Iteration {}".format(counter))
             for b in self.boards:
+                self.visualize(b)
                 if b.won():
                     self.found_solutions.append(b.solving_path)
+                    self.visualize(b, True)
                     print(b.solving_path)
                     return True
                 else:
@@ -107,6 +99,18 @@ class Solver:
             return False
         print("Found {} solutions!".format(len(self.found_solutions)))
         print(self.found_solutions)
+
+    def visualize(self, board, won=False):
+        plt.imshow(board.matrix, interpolation='nearest', cmap=plt.cm.binary_r)
+        plt.suptitle("Solving path: {}".format(board.solving_path))
+        plt.xticks([], [])
+        plt.yticks([], [])
+        if won:
+            plt.show()
+        else:
+            plt.show(block=False)
+            plt.pause(self.speed)
+            plt.clf()
 
 
 def main():
