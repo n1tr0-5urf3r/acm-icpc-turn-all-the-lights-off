@@ -51,7 +51,7 @@ class Board:
 
 
 class Solver:
-    def __init__(self, board, speed=0.0001):
+    def __init__(self, board, speed=0.1):
         self.boards = [board]
         self.known_configs = [hash(str(board.matrix))]
         self.found_solutions = []
@@ -65,7 +65,6 @@ class Solver:
         Checks if the given Board is solvable, keeps track of possible solutions
         :return:
         """
-        counter = 0
         while self.boards:
             new_boards = []
             # print("Iteration {}".format(counter))
@@ -73,7 +72,7 @@ class Solver:
                 self.visualize(b)
                 if b.won():
                     self.found_solutions.append(b.solving_path)
-                    self.visualize(b, True)
+                    self.visualize(b, won=True)
                     print(b.solving_path)
                     return True
                 else:
@@ -88,13 +87,13 @@ class Solver:
                             if new_board.won():
                                 self.found_solutions.append(new_board.solving_path)
                                 print(new_board.solving_path)
+                                self.visualize(new_board, won=True)
                                 return True
                             if new_hash not in self.known_configs:
                                 self.known_configs.append(new_hash)
                                 new_boards.append(new_board)
                 self.boards = new_boards
 
-            counter += 1
         if len(self.found_solutions) == 0:
             return False
         print("Found {} solutions!".format(len(self.found_solutions)))
@@ -105,10 +104,11 @@ class Solver:
         plt.suptitle("Solving path: {}".format(board.solving_path))
         plt.xticks([], [])
         plt.yticks([], [])
+        plt.show(block=False)
         if won:
-            plt.show()
+            plt.pause(2)
+            plt.clf()
         else:
-            plt.show(block=False)
             plt.pause(self.speed)
             plt.clf()
 
